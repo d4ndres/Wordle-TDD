@@ -40,4 +40,33 @@ describe('WordleBoard', () => {
     expect(wrapper.text()).not.toContain(DEFEAT_MESSAGE)
   })
 
+  test("If a word of the day provided does not have exactly 5 characters a warning is emitted", async () => {
+    // vitest
+    // const spy = vi.spyOn(console, "warn")
+    // spy.mockImplementation(() => null)
+    
+    // un mejor estándar entre jest y vitest
+    console.warn = vi.fn()
+
+    mount(WordleBoard, { props: { wordOfTheDay: "TEST" }})
+    expect(console.warn).toHaveBeenCalled()
+  })
+
+  test("if a word of the day is not all in uppercase, a warning is emitted", async () => {
+    console.warn = vi.fn()
+    mount(WordleBoard, { props: { wordOfTheDay: "tests" }})
+    expect(console.warn).toHaveBeenCalled()
+  })
+
+  test("if a word of the day is not real English word, a warning is emitted", async () => {
+    console.warn = vi.fn()
+    mount(WordleBoard, { props: { wordOfTheDay: "QWERT" }})
+    expect(console.warn).toHaveBeenCalled()
+  })
+
+  test("if a word of the day is a real word English word, no warning is emitted", async () => {
+    console.warn = vi.fn()
+    mount(WordleBoard, { props: { wordOfTheDay: "ABORT" }})
+    expect(console.warn).not.toHaveBeenCalled()
+  })
 })
