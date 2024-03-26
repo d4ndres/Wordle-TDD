@@ -46,8 +46,12 @@ describe('WordleBoard', () => {
 
   describe("Rules for define the word of the day", () => {
     
-    test.each(["TEST", "tests", "QWERT"]
-    )("If a '%s', warning is emitted", async (word) => {
+    test.each([
+      {word: "TEST", reason: "word of the day must have 5 characters"},
+      {word: "tests", reason: "word of the day must be all in uppercase"},
+      {word: "QWERT", reason: "word of the day must be a valid English word"}
+    ]
+    )("Since $reason: $word is invalid, therefore a warning must be emitted", async ({word}) => {
       // un mejor estándar entre jest y vitest
       // const spy = vi.spyOn(console, "warn")
       // spy.mockImplementation(() => null)
@@ -57,18 +61,6 @@ describe('WordleBoard', () => {
       console.warn = vi.fn()
   
       mount(WordleBoard, { props: { wordOfTheDay: word }})
-      expect(console.warn).toHaveBeenCalled()
-    })
-  
-    test("if a word of the day is not all in uppercase, a warning is emitted", async () => {
-      console.warn = vi.fn()
-      mount(WordleBoard, { props: { wordOfTheDay: "tests" }})
-      expect(console.warn).toHaveBeenCalled()
-    })
-  
-    test("if a word of the day is not real English word, a warning is emitted", async () => {
-      console.warn = vi.fn()
-      mount(WordleBoard, { props: { wordOfTheDay: "QWERT" }})
       expect(console.warn).toHaveBeenCalled()
     })
   
