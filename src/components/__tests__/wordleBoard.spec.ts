@@ -45,7 +45,11 @@ describe('WordleBoard', () => {
 
 
   describe("Rules for define the word of the day", () => {
-    
+    beforeEach(() => {
+      console.warn = vi.fn()
+    })
+
+
     test.each([
       {word: "TEST", reason: "word of the day must have 5 characters"},
       {word: "tests", reason: "word of the day must be all in uppercase"},
@@ -58,14 +62,13 @@ describe('WordleBoard', () => {
       // // esto permite usar el console.warn como si fuera un mock
       
       // vitest
-      console.warn = vi.fn()
+      // console.warn = vi.fn()
   
       mount(WordleBoard, { props: { wordOfTheDay: word }})
       expect(console.warn).toHaveBeenCalled()
     })
   
     test("if a word of the day is a real word English word, no warning is emitted", async () => {
-      console.warn = vi.fn()
       mount(WordleBoard, { props: { wordOfTheDay: "ABORT" }})
       expect(console.warn).not.toHaveBeenCalled()
     })
