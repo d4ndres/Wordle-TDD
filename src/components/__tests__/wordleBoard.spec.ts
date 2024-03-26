@@ -88,7 +88,14 @@ describe('WordleBoard', () => {
     })
     test("player guesses can only contain letters", async () => {
       await playerSubmitsGuess("H33}T")
-
+      // input.replace(/[^A-Z]+/gi ,"") // Todas las que no son letras
+      // /.../ indica una expresión regular
+      // ^ niega
+      // + uno o más coincidencias
+      // g global. no retorna con el primer match
+      // i case insensitive. mayúsculas y minúsculas
+      // A-Z letras de la A a la Z
+      // 0-9 números del 0 al 9
       expect(wrapper.find<HTMLInputElement>('input[type=text]').element.value).toEqual("HT")
     })
   })
