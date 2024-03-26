@@ -46,15 +46,17 @@ describe('WordleBoard', () => {
 
   describe("Rules for define the word of the day", () => {
     
-    test("If a word of the day provided does not have exactly 5 characters a warning is emitted", async () => {
-      // vitest
+    test.each(["TEST", "tests", "QWERT"]
+    )("If a '%s', warning is emitted", async (word) => {
+      // un mejor estándar entre jest y vitest
       // const spy = vi.spyOn(console, "warn")
       // spy.mockImplementation(() => null)
+      // // esto permite usar el console.warn como si fuera un mock
       
-      // un mejor estándar entre jest y vitest
+      // vitest
       console.warn = vi.fn()
   
-      mount(WordleBoard, { props: { wordOfTheDay: "TEST" }})
+      mount(WordleBoard, { props: { wordOfTheDay: word }})
       expect(console.warn).toHaveBeenCalled()
     })
   
