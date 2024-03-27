@@ -7,9 +7,6 @@ import confetti from 'canvas-confetti'
 import GuessComponent from '@/components/GuessComponent.vue'
 
 
-// defineProps<{ 
-//   wordOfTheDay: string
-// }>()
 
 const props = defineProps({
   wordOfTheDay: {
@@ -24,19 +21,21 @@ const props = defineProps({
 
 const timesGuessed = ref(0)
 const guessesSubmitted = ref<string[]>(Array(MAX_GUESSES).fill(""))
+const feedbackSubmitted = ref<boolean[]>(Array(MAX_GUESSES).fill(false))
 
 const handleGuessSubmitted = (guess: string) => {
   guessesSubmitted.value.splice(timesGuessed.value, 1, guess)
+  feedbackSubmitted.value.splice(timesGuessed.value, 1, true)
   timesGuessed.value++
 }
 
 const isGameOver = computed(() => timesGuessed.value >= MAX_GUESSES ||  guessesSubmitted.value.includes(props.wordOfTheDay))
 
-// watch(isGameOver, (newValue) => {
-//   if (newValue) {
-//     confetti()
-//   }
-// })
+watch(isGameOver, (newValue) => {
+  if (newValue) {
+    confetti()
+  }
+})
 
 
 </script>
@@ -44,8 +43,9 @@ const isGameOver = computed(() => timesGuessed.value >= MAX_GUESSES ||  guessesS
 <template>
   
   <ul class="tries">
-    <GuessComponent v-for="(guess, index) in guessesSubmitted" :key="`${guess}-${index}`" :guessField="guess">
+    <GuessComponent v-for="(guess, index) in guessesSubmitted" :key="`${guess}-${index}`" :guessField="guess" :answer="wordOfTheDay">
       <template #default v-if="index == timesGuessed">
+        
         <GuessInput :disabled="isGameOver" @guess-submitted="handleGuessSubmitted" />
       </template>
     </GuessComponent>

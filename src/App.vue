@@ -5,7 +5,7 @@ import WordleBoard from '@/components/WordleBoard.vue'
 <template>
 
   <div class="wrapper">
-    <WordleBoard wordOfTheDay="BLOOD" />
+    <WordleBoard wordOfTheDay="TESTS" />
   </div>
 
 </template>./components/WordleBoard.vue
