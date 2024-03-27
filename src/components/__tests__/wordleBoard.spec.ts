@@ -98,6 +98,12 @@ describe('WordleBoard', () => {
       // 0-9 números del 0 al 9
       expect(wrapper.find<HTMLInputElement>('input[type=text]').element.value).toEqual("HT")
     })
+
+
+    test("non-letter character do not render on the screen while being typed", async () => {
+      await playerSubmitsGuess("333")
+      expect(wrapper.find<HTMLInputElement>('input[type=text]').element.value).toEqual("")
+    })
   })
 
 })
