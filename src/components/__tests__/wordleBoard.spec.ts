@@ -1,6 +1,7 @@
 import { mount } from '@vue/test-utils'
 import WordleBoard from '../WordleBoard.vue'
-import {VICTORY_MESSAGE, DEFEAT_MESSAGE, MAX_GUESS_LENGTH} from '@/const/const'
+import GuessComponent from '../GuessComponent.vue'
+import {VICTORY_MESSAGE, DEFEAT_MESSAGE, MAX_GUESS_LENGTH, MAX_GUESSES} from '@/const/const'
 
 
 
@@ -33,7 +34,7 @@ describe('WordleBoard', () => {
       {numberOfGuesses: 2, shouldSeeDefeatMessage: false},
       {numberOfGuesses: 3, shouldSeeDefeatMessage: false},
       {numberOfGuesses: 4, shouldSeeDefeatMessage: false},
-      {numberOfGuesses: 5, shouldSeeDefeatMessage: true}
+      {numberOfGuesses: MAX_GUESSES, shouldSeeDefeatMessage: true}
     ])("a defeat message appears if the player makes a incorrect guesses 6 times in a row", ({numberOfGuesses, shouldSeeDefeatMessage}) => {
       test(`therefore for ${numberOfGuesses} guess(es), a defeat message should ${shouldSeeDefeatMessage ? "" : "not"} appear`, async () => {
         for (let i = 0; i < numberOfGuesses; i++){
@@ -126,6 +127,26 @@ describe('WordleBoard', () => {
       await playerSubmitsGuess("333")
       expect(wrapper.find<HTMLInputElement>('input[type=text]').element.value).toEqual("")
     })
+
+
+    test("the player losses control after the max amount of guesses have been sent", async () => {
+      const submits = async () => {
+        for (let i = 0; i < MAX_GUESSES; i++){
+          await playerSubmitsGuess("WRONG")
+        }
+      } 
+      await submits()
+
+      expect(wrapper.find("input[type=text]").exists()).toBe(false)
+      
+    })
+
+    test("the player losses controle after the correct guess has been given", async () => {
+      await playerSubmitsGuess(wordOfTheDay)
+
+      expect(wrapper.find("input[type=text]").attributes("disabled")).not.toBeUndefined()
+    })
+
   })
 
   describe("Integration tests. always autofocus in input", async () => {
@@ -157,6 +178,24 @@ describe('WordleBoard', () => {
       expect(wrapper.text()).toContain(guess)
     }
 
+  })
+
+  describe(`there should always be exactly ${MAX_GUESSES} guess-component in the board`, async () => {
+    test(`${MAX_GUESSES} guess-component are present a the start of the game`, async () => {
+      expect(wrapper.findAllComponents(GuessComponent)).toHaveLength(MAX_GUESSES)
+    })
+
+    test(`${MAX_GUESSES} guess-component are present as the player wins the game`, async () => {
+      await playerSubmitsGuess(wordOfTheDay)
+      expect(wrapper.findAllComponents(GuessComponent)).toHaveLength(MAX_GUESSES)
+    })
+
+    test(`${MAX_GUESSES} guess-component are present as the player loses the game`, async () => {
+      Array(5).forEach( async () => {
+        await playerSubmitsGuess("WRONG")
+      })
+      expect(wrapper.findAllComponents(GuessComponent)).toHaveLength(MAX_GUESSES)
+    })
   })
 
 })

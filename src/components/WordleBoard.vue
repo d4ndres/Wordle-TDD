@@ -4,6 +4,8 @@ import { ref, watch, computed } from 'vue'
 import englishWords from '@/mocks/englishWordsWith5Letters.json'
 import GuessInput from '@/components/GuessInput.vue'
 import confetti from 'canvas-confetti'
+import GuessComponent from '@/components/GuessComponent.vue'
+
 
 // defineProps<{ 
 //   wordOfTheDay: string
@@ -19,33 +21,43 @@ const props = defineProps({
   }
 })
 
-const guessesSubmitted = ref<string[]>([])
 
-// watch(()=> guessSubmitted.value, (newValue) => {
-//   const wordOfTheDay = props.wordOfTheDay;
-//   if (newValue === wordOfTheDay) {
+const timesGuessed = ref(0)
+const guessesSubmitted = ref<string[]>(Array(MAX_GUESSES).fill(""))
+
+const handleGuessSubmitted = (guess: string) => {
+  guessesSubmitted.value.splice(timesGuessed.value, 1, guess)
+  timesGuessed.value++
+}
+
+const isGameOver = computed(() => timesGuessed.value >= MAX_GUESSES ||  guessesSubmitted.value.includes(props.wordOfTheDay))
+
+// watch(isGameOver, (newValue) => {
+//   if (newValue) {
 //     confetti()
 //   }
 // })
-
-watch(() => guessesSubmitted.value, (newValue) => {
-  const wordOfTheDay = props.wordOfTheDay;
-  if (newValue.includes(wordOfTheDay)) {
-    confetti()
-  }
-})
-
-const isGameOver = computed(() => guessesSubmitted.value.length === MAX_GUESSES || guessesSubmitted.value.includes(props.wordOfTheDay))
 
 
 </script>
 
 <template>
-  <GuessInput @guess-submitted="guess => guessesSubmitted.push(guess)" />
-  <ul class="try">
-    <li v-for="(guess, index) in guessesSubmitted" :key="`${guess}-${index}`">
-      {{ guess }}
-    </li>
+  
+  <ul class="tries">
+    <GuessComponent v-for="(guess, index) in guessesSubmitted" :key="`${guess}-${index}`" :guessField="guess">
+      <template #default v-if="index == timesGuessed">
+        <GuessInput :disabled="isGameOver" @guess-submitted="handleGuessSubmitted" />
+      </template>
+    </GuessComponent>
   </ul>
   <p v-if="isGameOver" v-text="guessesSubmitted.includes(wordOfTheDay) ? VICTORY_MESSAGE : DEFEAT_MESSAGE"></p>
 </template>
+
+<style scoped>
+  .tries {
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: .5rem;
+  }
+</style>
