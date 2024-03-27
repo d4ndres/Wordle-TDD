@@ -1,48 +1,51 @@
 <script setup lang="ts">
-import {VICTORY_MESSAGE, DEFEAT_MESSAGE, MAX_GUESS_LENGTH} from '@/const/const'
-import {ref} from 'vue'
+import { VICTORY_MESSAGE, DEFEAT_MESSAGE, MAX_GUESS_LENGTH, MAX_GUESSES } from '@/const/const'
+import { ref, watch, computed } from 'vue'
 import englishWords from '@/mocks/englishWordsWith5Letters.json'
-
+import GuessInput from '@/components/GuessInput.vue'
+import confetti from 'canvas-confetti'
 
 // defineProps<{ 
 //   wordOfTheDay: string
 // }>()
 
-defineProps({
+const props = defineProps({
   wordOfTheDay: {
     type: String,
-    validator: (wordOfTheDay: string ) => wordOfTheDay.length === 5
-    && wordOfTheDay.toUpperCase() === wordOfTheDay
-    && englishWords.includes(wordOfTheDay)
+    validator: (wordOfTheDay: string) => wordOfTheDay.length === MAX_GUESS_LENGTH
+      && wordOfTheDay.toUpperCase() === wordOfTheDay
+      && englishWords.includes(wordOfTheDay),
+    required: true
   }
 })
 
-const guessInProgress = ref("")
-const guessSubmitted = ref("")
+const guessesSubmitted = ref<string[]>([])
 
-const onSubmit = () => {
-  if(!englishWords.includes(guessInProgress.value)) return
-  guessSubmitted.value = guessInProgress.value
-}
+// watch(()=> guessSubmitted.value, (newValue) => {
+//   const wordOfTheDay = props.wordOfTheDay;
+//   if (newValue === wordOfTheDay) {
+//     confetti()
+//   }
+// })
 
-const handleInput = (event: Event) : void => {
-  const target = event.target as HTMLInputElement
-  guessInProgress.value = target.value.substring(0, MAX_GUESS_LENGTH)
-    .toUpperCase()
-    .replace(/[^A-Z]+/gi ,"")
-  target.value = guessInProgress.value
-}
+watch(() => guessesSubmitted.value, (newValue) => {
+  const wordOfTheDay = props.wordOfTheDay;
+  if (newValue.includes(wordOfTheDay)) {
+    confetti()
+  }
+})
+
+const isGameOver = computed(() => guessesSubmitted.value.length === MAX_GUESSES || guessesSubmitted.value.includes(props.wordOfTheDay))
+
 
 </script>
 
 <template>
-  {{ guessInProgress }}
-  <input 
-  :maxlength="MAX_GUESS_LENGTH" 
-  type="text" 
-  :value="guessInProgress"
-  @input="handleInput"
-  @keydown.enter="onSubmit">
-  <p v-if="guessSubmitted.length" 
-  v-text="guessSubmitted === wordOfTheDay ? VICTORY_MESSAGE : DEFEAT_MESSAGE" ></p>
+  <GuessInput @guess-submitted="guess => guessesSubmitted.push(guess)" />
+  <ul class="try">
+    <li v-for="(guess, index) in guessesSubmitted" :key="`${guess}-${index}`">
+      {{ guess }}
+    </li>
+  </ul>
+  <p v-if="isGameOver" v-text="guessesSubmitted.includes(wordOfTheDay) ? VICTORY_MESSAGE : DEFEAT_MESSAGE"></p>
 </template>
